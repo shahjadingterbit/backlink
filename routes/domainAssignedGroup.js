@@ -4,5 +4,8 @@ const domainAssignedGroupController = require("../controllers/domainAssignedGrou
 router.route("/").get(domainAssignedGroupController.domainAssignedGroupList);
 router.route("/assignGroupToDomain").post(domainAssignedGroupController.assignGroupToDomain);
 router.route("/updateGroupFromDomain").put(domainAssignedGroupController.updateGroupFromDomain);
+router.get("/domainListHasGroup",domainAssignedGroupController.domainListHasGroup);
 router.delete("/:domain_id",domainAssignedGroupController.deleteGroupFromDomain);
+
+
 module.exports = router;

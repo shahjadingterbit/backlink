@@ -48,7 +48,37 @@ const groupAssignedBacklinkList = async (req, res) => {
     throw new Error(err.message);
   }
 };
-
+const groupListHasBacklinks = async (req, res) => {
+  try {
+    let results = [];
+    let groupName;
+    const groupAssignedBacklinkData =
+      await req.masterDb.groupAssignedBacklink.findAll();
+    if (_.isEmpty(groupAssignedBacklinkData)) {
+      return res.status(400).send({
+        status: false,
+        message: "There is no group which assigned backlinks",
+      });
+    }
+    for (const rowData of groupAssignedBacklinkData) {
+      groupName = await req.masterDb.Group.findByPk(rowData.group_id);
+      results.push({
+        group_id: rowData.group_id,
+        group_name: groupName.group_name,
+      });
+    }
+    return res.status(200).json(results);
+  } catch (err) {
+    console.log(
+      "🚀 ~ file: groupAssignedBacklinkController.js:72 ~ group ~ err",
+      err.message
+    );
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    throw new Error(err.message);
+  }
+};
 const assignBacklinkToGroup = async (req, res) => {
   try {
     let { group_id, backlink_domain_ids } = req.body;
@@ -85,7 +115,7 @@ const assignBacklinkToGroup = async (req, res) => {
     });
     return res
       .status(201)
-      .send({ status: false, message: "Backlink assigned to this group" });
+      .send({ status: true, message: "Backlink assigned to this group" });
   } catch (err) {
     console.log(
       "🚀 ~ file: groupAssignedBacklink.js:15 ~ groupList ~ err",
@@ -125,7 +155,7 @@ const updateBacklinkToGroup = async (req, res) => {
     if (_.isEmpty(isGroupHasBacklink)) {
       return res
         .status(400)
-        .send({ status: false, message: "This Group has no backlinks" });
+        .send({ status: false, message: "group_id is invalid" });
     }
 
     await req.masterDb.groupAssignedBacklink.update(
@@ -137,8 +167,8 @@ const updateBacklinkToGroup = async (req, res) => {
       }
     );
     return res
-        .status(200)
-        .send({ status: true, message: "updated backlink to this group" });
+      .status(200)
+      .send({ status: true, message: "updated backlink to this group" });
   } catch (err) {
     console.log(
       "🚀 ~ file: groupAssignedBacklink.js:193 ~ updateGroup ~ err",
@@ -155,7 +185,17 @@ const deleteBacklinkFromGroup = async (req, res) => {
   try {
     const group_id = req.params.group_id;
     if (_.isEmpty(group_id)) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .send({ status: false, message: "group_id feild is required" });
+    }
+    const isGroupExist = await req.masterDb.groupAssignedBacklink.findOne({
+      where: { id: group_id },
+    });
+    if (_.isEmpty(isGroupExist)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "group_id is invalid" });
     }
 
     const data = await req.masterDb.groupAssignedBacklink.destroy({
@@ -165,7 +205,7 @@ const deleteBacklinkFromGroup = async (req, res) => {
     if (data) {
       return res
         .status(200)
-        .json({ status: "Backling deleted from group successfully" });
+        .send({ status: true, message: "backlink assinged group deleted" });
     } else {
       return res.status(400).json("Invalid request");
     }
@@ -186,4 +226,5 @@ module.exports = {
   assignBacklinkToGroup,
   updateBacklinkToGroup,
   deleteBacklinkFromGroup,
+  groupListHasBacklinks,
 };

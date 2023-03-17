@@ -3,6 +3,7 @@ const user = require("./user");
 const auth = require("./auth");
 const refresh = require("./refresh");
 const backlink = require("./backlink");
+const domain = require("./domain");
 const group = require("./group");
 const groupAssignedBacklink = require("./groupAssignedBacklink");
 const domainAssignedGroup = require("./domainAssignedGroup");
@@ -13,6 +14,7 @@ module.exports = {
   role,
   user,
   backlink,
+  domain,
   group,
   groupAssignedBacklink,
   domainAssignedGroup,

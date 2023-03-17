@@ -3,7 +3,9 @@ const backLinkList = async (req, res) => {
   try {
     const backlinksData = await req.masterDb.Backlink.findAll();
     if (_.isEmpty(backlinksData)) {
-      return "backlinksData information is not exist";
+      return res
+        .status(400)
+        .send({ status: false, message: "There is no backLinkList" });
     }
     return res.status(200).json(backlinksData);
   } catch (err) {
@@ -53,15 +55,19 @@ const addBacklink = async (req, res) => {
     } = req.body;
 
     if (_.isEmpty(backlink_domain)) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .send({ status: false, message: "backlink_domain is required" });
     }
     const backlinkCheck = await req.masterDb.Backlink.findOne({
       where: { backlink_domain },
     });
     if (!_.isEmpty(backlinkCheck)) {
-      return res.status(400).send("This backlink is already in database");
+      return res
+        .status(400)
+        .send({ status: false, message: "backlink_domain is already in database" });
     }
-    const result = await req.masterDb.Backlink.create({
+    await req.masterDb.Backlink.create({
       backlink_domain,
       black_list,
       industry,
@@ -143,7 +149,9 @@ const updateBacklink = async (req, res) => {
     } = req.body;
 
     if (_.isEmpty(id) || _.isEmpty(backlink_domain)) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .send({ status: false, message: "id and backlink_domain is required" });
     }
 
     const backlink = await req.masterDb.Backlink.findByPk(id);
@@ -192,8 +200,8 @@ const updateBacklink = async (req, res) => {
       }
     );
     return res
-    .status(200)
-    .send({ status: true, message: "Backlink updated successfully" });
+      .status(200)
+      .send({ status: true, message: "Backlink updated successfully" });
   } catch (err) {
     console.log(
       "🚀 ~ file: backlistcontroller.js:193 ~ updateBackLink ~ err",
@@ -210,17 +218,25 @@ const deleteBacklink = async (req, res) => {
   try {
     const id = req.params.id;
     if (_.isEmpty(id)) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .send({ status: false, message: "id is required" });
     }
+    const backlink = await req.masterDb.Backlink.findByPk(id);
 
+    if (_.isEmpty(backlink)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "backlink id is invalid" });
+    }
     const data = await req.masterDb.Backlink.destroy({
       where: { id },
     });
 
     if (data) {
       return res
-      .status(200)
-      .send({ status: true, message: "Backlink deleted successfully" });
+        .status(200)
+        .send({ status: true, message: "Backlink deleted successfully" });
     } else {
       return res.status(400).json("Invalid request");
     }

@@ -13,7 +13,7 @@ const domainAssingedToUserList = async (req, res) => {
     if (_.isEmpty(isUserExist)) {
       return res
         .status(400)
-        .send({ status: false, message: "User does not exists" });
+        .send({ status: false, message: "User id is invalid" });
     }
     let results = [];
     const domainAssignedToUserData =
@@ -62,7 +62,7 @@ const addDomainToUser = async (req, res) => {
     if (_.isEmpty(isUserExist)) {
       return res
         .status(400)
-        .send({ status: false, message: "User does not exists" });
+        .send({ status: false, message: "User id is invalid" });
     }
 
     const isUserExistFortheseDomains = await req.masterDb.domainAssignedToUser.findOne({
@@ -71,7 +71,7 @@ const addDomainToUser = async (req, res) => {
     if (!_.isEmpty(isUserExistFortheseDomains)) {
       return res
         .status(400)
-        .send({ status: false, message: "User already has domain" });
+        .send({ status: false, message: "User already has domains,so use update API"});
     }
     await req.masterDb.domainAssignedToUser.create({
       user_id,
@@ -104,8 +104,20 @@ const updateDomainToUser = async (req, res) => {
     if (_.isEmpty(isUserExist)) {
       return res
         .status(400)
-        .send({ status: false, message: "User does not exists" });
+        .send({ status: false, message: "User id is invalid" });
     }
+
+    const isUserHasDomain = await req.masterDb.domainAssignedToUser.findOne(
+      {
+        where: { user_id },
+      }
+    );
+    if (_.isEmpty(isUserHasDomain)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "This User has no backlinks, first assing domain this user" });
+    }
+
     await req.masterDb.domainAssignedToUser.update(
       { domain_ids: domain_ids.toString() },
       {

@@ -4,5 +4,6 @@ const groupAssignedBacklinkController = require("../controllers/groupAssignedBac
 router.route("/").get(groupAssignedBacklinkController.groupAssignedBacklinkList);
 router.route("/assignBacklinkToGroup").post(groupAssignedBacklinkController.assignBacklinkToGroup);
 router.route("/updateBacklinkToGroup").put(groupAssignedBacklinkController.updateBacklinkToGroup);
+router.route("/groupListHasBacklinks").get(groupAssignedBacklinkController.groupListHasBacklinks);
 router.delete("/:group_id",groupAssignedBacklinkController.deleteBacklinkFromGroup);
 module.exports = router;

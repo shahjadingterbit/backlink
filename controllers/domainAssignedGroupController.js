@@ -43,7 +43,37 @@ const domainAssignedGroupList = async (req, res) => {
     throw new Error(err.message);
   }
 };
-
+const domainListHasGroup = async (req, res) => {
+  try {
+  
+    let results = [];
+    let domainName;
+    let domainHasAssignGroupList = await req.masterDb.domainAssignedGroup.findAll();
+    if (_.isEmpty(domainHasAssignGroupList)) {
+      return res.status(400).send({
+        status: false,
+        message: "There is no domain which assigned Group",
+      });
+    }
+    for (const rowData of domainHasAssignGroupList) {
+      domainName = await req.masterDb.CMSProcessedDomain.findByPk(rowData.domain_id);
+      results.push({
+        domain_id: rowData.domain_id,
+        domain: domainName.domain,
+      });
+    }
+    return res.status(200).json(results);
+  } catch (err) {
+    console.log(
+      "🚀 ~ file: domainAssignedGroupController.js:15 ~ group ~ err",
+      err.message
+    );
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    throw new Error(err.message);
+  }
+};
 const assignGroupToDomain = async (req, res) => {
   try {
     let { domain_id, group_ids } = req.body;
@@ -177,4 +207,5 @@ module.exports = {
   assignGroupToDomain,
   updateGroupFromDomain,
   deleteGroupFromDomain,
+  domainListHasGroup,
 };

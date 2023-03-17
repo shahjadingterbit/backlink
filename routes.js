@@ -4,6 +4,7 @@ const {
   user,
   auth,
   backlink,
+  domain,
   group,
   groupAssignedBacklink,
   domainAssignedGroup,
@@ -17,6 +18,7 @@ module.exports = function (app) {
   app.use("/api/auth", auth);
   app.use("/api/refresh", refresh); // refresh token
   app.use("/api/backlinks", backlink);
+  app.use("/api/domains", domain);
   app.use("/api/groups", group);
   app.use("/api/groupAssignedBacklink", groupAssignedBacklink);
   app.use("/api/domainAssignedGroup", domainAssignedGroup);

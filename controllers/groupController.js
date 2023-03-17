@@ -3,7 +3,9 @@ const groupList = async (req, res) => {
   try {
     const groupData = await req.masterDb.Group.findAll();
     if (_.isEmpty(groupData)) {
-      return "groupData information is not exist";
+      return res
+        .status(400)
+        .send({ status: false, message: "There is no group" });
     }
     return res.status(200).json(groupData);
   } catch (err) {
@@ -20,16 +22,20 @@ const addGroup = async (req, res) => {
     let { group_name } = req.body;
 
     if (_.isEmpty(group_name)) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .send({ status: false, message: "group_name is required" });
     }
     const groupCheck = await req.masterDb.Group.findOne({
       where: { group_name },
     });
     if (!_.isEmpty(groupCheck)) {
-      return res.status(400).send("This group is already in database");
+      return res
+        .status(400)
+        .send({ status: false, message: "This group is already in database" });
     }
     const result = await req.masterDb.Group.create({ group_name });
-    return res.status(200).json({ status: "group added" });
+    return res.status(201).send({ status: true, message: "group added" });
   } catch (err) {
     console.log(
       "🚀 ~ file: groupController.js:15 ~ groupList ~ err",
@@ -47,8 +53,20 @@ const updateGroup = async (req, res) => {
     let { id, group_name } = req.body;
 
     if (_.isEmpty(id) || _.isEmpty(group_name)) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .send({ status: false, message: "id and group_name is required" });
     }
+    const isGroupExist = await req.masterDb.Group.findOne({
+      where: { id },
+    });
+
+    if (_.isEmpty(isGroupExist)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Group id is invalid" });
+    }
+
     await req.masterDb.Group.update(
       { group_name },
       {
@@ -57,7 +75,9 @@ const updateGroup = async (req, res) => {
         },
       }
     );
-    return res.status(200).send({ status: "group updated successfully" });
+    return res
+      .status(200)
+      .send({ status: true, message: "Group updated successfully" });
   } catch (err) {
     console.log(
       "🚀 ~ file: groupController.js:193 ~ updateGroup ~ err",
@@ -74,15 +94,24 @@ const deleteGroup = async (req, res) => {
   try {
     const id = req.params.id;
     if (_.isEmpty(id)) {
-      return res.sendStatus(400);
+      return res.status(400).send({ status: false, message: "id is required" });
     }
 
+    const isGroupExist = await req.masterDb.Group.findOne({
+      where: { id },
+    });
+    if (_.isEmpty(isGroupExist)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Group id is invalid" });
+    }
     const data = await req.masterDb.Group.destroy({
       where: { id },
     });
-
     if (data) {
-      return res.status(200).json({ status: "group deleted successfully" });
+      return res
+        .status(400)
+        .send({ status: true, message: "Group deleted successfully" });
     } else {
       return res.status(400).json("Invalid request");
     }

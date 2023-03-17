@@ -44,7 +44,7 @@ const addWorkForBacklink = async (req, res) => {
     if (_.isEmpty(domain)) {
       return res
         .status(400)
-        .send({ status: false, message: "domain is invalid" });
+        .send({ status: false, message: "domain id is invalid" });
     }
 
     const group = await req.masterDb.Group.findByPk(group_id);
