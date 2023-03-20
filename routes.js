@@ -24,7 +24,7 @@ module.exports = function (app) {
   app.use("/api/domainAssignedGroup", domainAssignedGroup);
   app.use("/api/domainAssignedToUser", domainAssignedToUser);
   app.use("/api/linkbuilderTask", linkBuilderTask);
-  app.use(verifyJWT);
+  // app.use(verifyJWT);
   app.use("/api/roles", role);
   app.use("/api/users", user);
   app.use(errorHandler);
