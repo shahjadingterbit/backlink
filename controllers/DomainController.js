@@ -1,7 +1,15 @@
 const _ = require("lodash");
+const { QueryTypes } = require("sequelize");
+const masterDBCon = require("../config/database");
 const domainList = async (req, res) => {
   try {
-    const domainListData = await req.masterDb.CMSProcessedDomain.findAll();
+    let masterDb = await masterDBCon.Connect2();
+    const domainListData = await masterDb.query(
+      `SELECT * FROM cms_processed_domains`,
+      {
+        type: QueryTypes.SELECT,
+      }
+    );
     if (_.isEmpty(domainListData)) {
       return res
         .status(400)

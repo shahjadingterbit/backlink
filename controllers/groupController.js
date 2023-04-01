@@ -89,7 +89,32 @@ const updateGroup = async (req, res) => {
     throw new Error(err.message);
   }
 };
-
+const editGroup = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (_.isEmpty(id)) {
+      return res.status(400).send({ status: false, message: "id is required" });
+    }
+    const groupData = await req.masterDb.Group.findOne({
+      where: { id },
+    });
+    if (_.isEmpty(groupData)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Group id is invalid" });
+    }
+    return res.status(200).json(groupData);
+  } catch (err) {
+    console.log(
+      "🚀 ~ file: groupController.js:221 ~ deleteGroup ~ err",
+      err.message
+    );
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    throw new Error(err.message);
+  }
+};
 const deleteGroup = async (req, res) => {
   try {
     const id = req.params.id;
@@ -130,6 +155,7 @@ const deleteGroup = async (req, res) => {
 module.exports = {
   groupList,
   addGroup,
+  editGroup,
   updateGroup,
   deleteGroup,
 };

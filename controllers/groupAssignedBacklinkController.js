@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const groupAssignedBacklinkList = async (req, res) => {
   try {
-    let { group_id } = req.body;
+    const group_id = req.params.group_id;
     let results = [];
     if (_.isEmpty(group_id)) {
       return res
@@ -28,7 +28,9 @@ const groupAssignedBacklinkList = async (req, res) => {
       });
     }
     let backlinkRowData = await req.masterDb.Backlink.findAll({
-      id: { in: [groupAssignedBacklinkData.backlink_domain_ids] },
+      where: {
+        id: groupAssignedBacklinkData.backlink_domain_ids.split(","),
+      },
     });
     for (const rowData of backlinkRowData) {
       results.push({
