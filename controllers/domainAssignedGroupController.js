@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const domainAssignedGroupList = async (req, res) => {
   try {
-    let { domain_id } = req.body;
+    const domain_id = req.params.id;
     let results = [];
 
     const domain = await req.masterDb.CMSProcessedDomain.findByPk(domain_id);
@@ -94,9 +94,17 @@ const assignGroupToDomain = async (req, res) => {
     });
 
     if (!_.isEmpty(isDomainExisForTheseDomains)) {
+      await req.masterDb.domainAssignedGroup.update(
+        { group_ids: group_ids.toString() },
+        {
+          where: {
+            domain_id,
+          },
+        }
+      );
       return res
-        .status(400)
-        .send({ status: false, message: "Domain already has domains" });
+        .status(200)
+        .send({ status: true, message: "updated group to this domain" });
     }
     
     await req.masterDb.domainAssignedGroup.create({

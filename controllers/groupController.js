@@ -106,7 +106,7 @@ const editGroup = async (req, res) => {
     return res.status(200).json(groupData);
   } catch (err) {
     console.log(
-      "🚀 ~ file: groupController.js:221 ~ deleteGroup ~ err",
+      "🚀 ~ file: groupController.js:221 ~ editGroup ~ err",
       err.message
     );
     if (!err.statusCode) {

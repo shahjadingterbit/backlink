@@ -106,9 +106,17 @@ const assignBacklinkToGroup = async (req, res) => {
       }
     );
     if (!_.isEmpty(isGroupHasBacklink)) {
+      await req.masterDb.groupAssignedBacklink.update(
+        { backlink_domain_ids: backlink_domain_ids.toString() },
+        {
+          where: {
+            group_id,
+          },
+        }
+      );
       return res
-        .status(400)
-        .send({ status: false, message: "This Group already has backlinks" });
+        .status(200)
+        .send({ status: true, message: "updated backlink to this group" });
     }
 
     await req.masterDb.groupAssignedBacklink.create({
@@ -134,10 +142,10 @@ const updateBacklinkToGroup = async (req, res) => {
   try {
     let { group_id, backlink_domain_ids } = req.body;
 
-    if (_.isEmpty(group_id) || _.isEmpty(backlink_domain_ids)) {
+    if (_.isEmpty(group_id)) {
       return res.status(400).send({
         status: false,
-        message: "group_id and  backlink_domain_ids both are required",
+        message: "group_id is required",
       });
     }
     const isGroupExist = await req.masterDb.Group.findOne({

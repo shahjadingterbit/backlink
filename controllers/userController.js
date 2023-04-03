@@ -54,7 +54,7 @@ const addUser = async (req, res) => {
     });
     delete newUser.password;
     newUser["role_id"] = role;
-    return res.status(201).send(newUser);
+    return res.status(200).send(newUser);
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }
@@ -141,4 +141,32 @@ const getUsers = async (req, res) => {
     return res.status(500).send({ status: false, message: err.message });
   }
 };
-module.exports = { addUser, updateUser, getUsers };
+
+const editUser = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (_.isEmpty(id)) {
+      return res.status(400).send({ status: false, message: "id is required" });
+    }
+    const userData = await req.masterDb.User.findOne({
+      where: { id },
+    });
+    if (_.isEmpty(userData)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "User id is invalid" });
+    }
+    delete userData.password;
+    return res.status(200).json(userData);
+  } catch (err) {
+    console.log(
+      "🚀 ~ file: userController.js:221 ~ editUser ~ err",
+      err.message
+    );
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    throw new Error(err.message);
+  }
+};
+module.exports = { addUser, editUser,updateUser, getUsers, };
