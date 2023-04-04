@@ -43,11 +43,7 @@ module.exports = async function (req, res, next) {
       masterDb,
       Sequelize
     );
-    req.masterDb.CMSProcessedDomain =
-    require("../models/CMSProcessedDomain.model")(
-      masterDb,
-      Sequelize
-    );
+    
     req.masterDb.UserToken =
     require("../models/userToken.model")(
       masterDb,

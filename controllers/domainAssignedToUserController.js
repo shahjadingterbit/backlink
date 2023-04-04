@@ -1,7 +1,10 @@
 const _ = require("lodash");
+const { QueryTypes } = require("sequelize");
+const masterDBCon = require("../config/database");
+
 const domainAssingedToUserList = async (req, res) => {
   try {
-    let { user_id } = req.body;
+    const user_id = req.params.user_id;
     if (_.isEmpty(user_id)) {
       return res
         .status(400)
@@ -21,16 +24,22 @@ const domainAssingedToUserList = async (req, res) => {
         where: { user_id },
         raw: true,
       });
-    if (_.isEmpty(domainAssignedToUserData)) {
+    if (_.isEmpty(domainAssignedToUserData) || _.isEmpty(domainAssignedToUserData.domain_ids)) {
       return res
         .status(400)
         .send({ status: false, message: "No domain assigned to this user" });
     }
-    let domainRowData = await req.masterDb.CMSProcessedDomain.findAll({
-      where: {
-        id: JSON.parse("[" + domainAssignedToUserData.domain_ids + "]"),
-      },
-    });
+
+
+    let sql = `SELECT * FROM cms_processed_domains WHERE id in ${"("+domainAssignedToUserData.domain_ids+")"}`;
+    let masterDb = await masterDBCon.Connect2();
+    const domainRowData = await masterDb.query(
+      sql,
+      {
+        type: QueryTypes.SELECT,
+      }
+    );
+      
     for (const rowData of domainRowData) {
       results.push({
         domain_id: rowData.id,
@@ -69,16 +78,27 @@ const addDomainToUser = async (req, res) => {
       where: { user_id },
     });
     if (!_.isEmpty(isUserExistFortheseDomains)) {
+      await req.masterDb.domainAssignedToUser.update(
+        { domain_ids: domain_ids.toString() },
+        {
+          where: {
+            user_id,
+          },
+        }
+      );
       return res
-        .status(400)
-        .send({ status: false, message: "User already has domains,so use update API"});
+        .status(200)
+        .send({
+          status: false,
+          message: "Updated domains for this user successfully",
+        });
     }
     await req.masterDb.domainAssignedToUser.create({
       user_id,
       domain_ids: domain_ids.toString(),
     });
     return res
-      .status(201)
+      .status(200)
       .send({ status: true, message: "Domains assigned to this user" });
   } catch (err) {
     console.log(
@@ -95,7 +115,7 @@ const addDomainToUser = async (req, res) => {
 const updateDomainToUser = async (req, res) => {
   try {
     let { user_id, domain_ids } = req.body;
-    if (_.isEmpty(user_id) || _.isEmpty(domain_ids)) {
+    if (_.isEmpty(user_id)) {
       return res.sendStatus(400);
     }
     const isUserExist = await req.masterDb.User.findOne({
@@ -106,18 +126,6 @@ const updateDomainToUser = async (req, res) => {
         .status(400)
         .send({ status: false, message: "User id is invalid" });
     }
-
-    const isUserHasDomain = await req.masterDb.domainAssignedToUser.findOne(
-      {
-        where: { user_id },
-      }
-    );
-    if (_.isEmpty(isUserHasDomain)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "This User has no backlinks, first assing domain this user" });
-    }
-
     await req.masterDb.domainAssignedToUser.update(
       { domain_ids: domain_ids.toString() },
       {

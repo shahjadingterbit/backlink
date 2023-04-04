@@ -35,7 +35,7 @@ const addGroup = async (req, res) => {
         .send({ status: false, message: "This group is already in database" });
     }
     const result = await req.masterDb.Group.create({ group_name });
-    return res.status(201).send({ status: true, message: "group added" });
+    return res.status(200).send({ status: true, message: "group added" });
   } catch (err) {
     console.log(
       "🚀 ~ file: groupController.js:15 ~ groupList ~ err",

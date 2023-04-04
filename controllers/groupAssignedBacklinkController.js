@@ -124,7 +124,7 @@ const assignBacklinkToGroup = async (req, res) => {
       backlink_domain_ids: backlink_domain_ids.toString(),
     });
     return res
-      .status(201)
+      .status(200)
       .send({ status: true, message: "Backlink assigned to this group" });
   } catch (err) {
     console.log(
